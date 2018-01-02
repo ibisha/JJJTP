@@ -1,0 +1,44 @@
+setting.*
+
+# Java class files
+*.class
+
+# Maven
+target/
+
+# generated files
+out/
+bin/
+build/
+
+# eclipse settings
+.project
+.metadata
+.classpath
+.settings/
+.loadpath
+
+# tmp
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*.log
+ 
+# External tool builders
+.externalToolBuilders/
+ 
+# Locally stored "Eclipse launch configurations"
+*.launch
+ 
+# Intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+ 
+# OS
+.DS_Store
+Thumbs.db
+
