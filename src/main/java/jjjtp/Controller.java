@@ -59,7 +59,7 @@ public class Controller implements Initializable {
 
     /** ファイル一覧テーブル */
     @FXML
-    TableView<FileBean> tableLog;
+    TableView<FileBean> tableFile;
     @FXML
     TableColumn<FileBean, String> columnFileName;
     @FXML
@@ -68,7 +68,7 @@ public class Controller implements Initializable {
     /** 選択されているサーバ */
     MachineBean selectedMachine;
     /** ファイル一覧 */
-    List<FileBean> logFileList;
+    List<FileBean> fileList;
 
     /** ファイル管理 */
     FileListManager fileListManager;
@@ -84,13 +84,13 @@ public class Controller implements Initializable {
             machineList.setRoot(machineRoot);
 
             // 一覧を取得
-            logFileList = ConfigParser.createFileList(SETTING_FILE);
+            fileList = ConfigParser.createFileList(SETTING_FILE);
 
             fieldSaveTo.setText(ConfigParser.getSaveTo(SETTING_FILE));
 
             columnFileName.setCellValueFactory(new PropertyValueFactory<>("fileName"));
             columnTimeStamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
-            tableLog.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            tableFile.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
             machineList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 // サーバを選択した時に名前が表示されるよう設定
@@ -109,20 +109,20 @@ public class Controller implements Initializable {
      * @param event
      */
     @FXML
-    public void doGetLogList(ActionEvent event) {
+    public void doGetFileList(ActionEvent event) {
         if (selectedMachine.getIp() == null || selectedMachine.getIp().length() == 0) {
             return;
         }
 
         // 取得したいファイルの種類を選択するダイアログ
         ChoiceDialog<FileBean> dialog = new ChoiceDialog<>();
-        ListView<FileBean> logList = new ListView<>();
-        logList.setItems(FXCollections.observableArrayList());
-        logFileList.stream().filter(i -> i.getGroup().equals(selectedMachine.getGroup()))
-                .forEach(i -> logList.getItems().add(i));
-        MultipleSelectionModel msm = logList.getSelectionModel();
+        ListView<FileBean> fileList = new ListView<>();
+        fileList.setItems(FXCollections.observableArrayList());
+        this.fileList.stream().filter(i -> i.getGroup().equals(selectedMachine.getGroup()))
+                .forEach(i -> fileList.getItems().add(i));
+        MultipleSelectionModel msm = fileList.getSelectionModel();
         msm.setSelectionMode(SelectionMode.MULTIPLE);
-        dialog.getDialogPane().setContent(logList);
+        dialog.getDialogPane().setContent(fileList);
         dialog.getDialogPane().setHeaderText("ファイル選択");
 
         // OKボタン押下時のみ、選択項目を渡す
@@ -143,12 +143,12 @@ public class Controller implements Initializable {
         btnDownload.setDisable(false);
         // テーブルの生成
         ObservableList<FileBean> tableItems = FXCollections.observableArrayList();
-        tableLog.setItems(tableItems);
+        tableFile.setItems(tableItems);
         fileListManager = new FileListManager(selectedMachine, selectedFiles);
 
         fileListManager.open();
         try {
-            fileListManager.createLogTable(tableItems);
+            fileListManager.createFileTable(tableItems);
             if (tableItems.isEmpty()) {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setTitle("INFO");
@@ -175,11 +175,11 @@ public class Controller implements Initializable {
      */
     @FXML
     public void doDownload(ActionEvent event) {
-        ObservableList<FileBean> selectedItems = tableLog.getSelectionModel().getSelectedItems();
+        ObservableList<FileBean> selectedItems = tableFile.getSelectionModel().getSelectedItems();
         for (FileBean selectedItem : selectedItems) {
             logger.debug(selectedItem.paramString());
         }
-        if (!fileListManager.downloadLog(selectedItems, fieldSaveTo.getText())) {
+        if (!fileListManager.downloadFile(selectedItems, fieldSaveTo.getText())) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("ERROR");
             alert.setHeaderText("ダウンロードに失敗しました。");
@@ -199,7 +199,7 @@ public class Controller implements Initializable {
         btnDownload.setDisable(true);
         btnCancel.setDisable(true);
         machineList.setDisable(false);
-        tableLog.setItems(null);
+        tableFile.setItems(null);
         if (fileListManager != null) {
             fileListManager.cancel();
         }

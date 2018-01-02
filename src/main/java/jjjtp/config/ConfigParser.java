@@ -66,7 +66,7 @@ public class ConfigParser {
         XPath xpath = xpathFactory.newXPath();
 
         // envsの名前をツリーのルートにセット
-        String location = "/getlog/envs";
+        String location = "/jjjtp/envs";
         Element envs = (Element) xpath.evaluate(location, document, XPathConstants.NODE);
 
         if (envs == null) {
@@ -164,7 +164,7 @@ public class ConfigParser {
         XPath xpath = xpathFactory.newXPath();
 
         // ファイル種別一覧を取得
-        String location = "/getlog/fileTypes/group";
+        String location = "/jjjtp/fileTypes/group";
         NodeList fileGroups = (NodeList) xpath.evaluate(location, document, XPathConstants.NODESET);
 
         if (fileGroups == null) {
@@ -216,7 +216,7 @@ public class ConfigParser {
     }
 
     /**
-     * 保存先を取得 /getlog/saveFolder/path の文字列を返す
+     * 保存先を取得
      *
      * @param settingFile 設定ファイル
      * @return 保存先
@@ -225,7 +225,7 @@ public class ConfigParser {
             throws SAXException, ParserConfigurationException, XPathExpressionException {
         Document document = encryptedXMLReader(settingFile);
         XPath xpath = xpathFactory.newXPath();
-        String location = "/getlog/saveFolder/path";
+        String location = "/jjjtp/saveFolder/path";
         Element saveTo = (Element) xpath.evaluate(location, document, XPathConstants.NODE);
         if (saveTo == null) {
             throw new XPathExpressionException("保存先 " + location + "が設定されていません");

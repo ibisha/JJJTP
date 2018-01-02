@@ -25,10 +25,10 @@ public class FileListManager {
     /** 一覧 */
     private List<FileBean> fileList;
 
-    public FileListManager(MachineBean selected, List<FileBean> logFileList) {
+    public FileListManager(MachineBean selected, List<FileBean> fileList) {
         this.selected = selected;
         this.fileList = new ArrayList<FileBean>();
-        for (FileBean fileBean : logFileList) {
+        for (FileBean fileBean : fileList) {
             try {
                 this.fileList.add(fileBean.clone());
             } catch (CloneNotSupportedException e) {
@@ -52,22 +52,22 @@ public class FileListManager {
      * @param items
      * @throws IOException
      */
-    public void createLogTable(ObservableList<FileBean> items) {
-        List<FileBean> targetLogs = fileList.stream().filter(i -> i.getGroup().equals(selected.getGroup()))
+    public void createFileTable(ObservableList<FileBean> items) {
+        List<FileBean> targetFiles = fileList.stream().filter(i -> i.getGroup().equals(selected.getGroup()))
                 .collect(Collectors.toList());
-        for (FileBean targetLog : targetLogs) {
+        for (FileBean targetFile : targetFiles) {
             try {
-                // targetLogに一致する一覧をサーバから取得する
-                List<FileBean> logs = serverConnector.getFileName(targetLog);
-                items.addAll(logs);
+                // targetに一致する一覧をサーバから取得する
+                List<FileBean> files = serverConnector.getFileName(targetFile);
+                items.addAll(files);
             } catch (IOException e) {
                 logger.error(e);
             }
         }
     }
 
-    public boolean downloadLog(List<FileBean> targetLogs, String savePath) {
-        return serverConnector.getFile(targetLogs, savePath);
+    public boolean downloadFile(List<FileBean> targetFile, String savePath) {
+        return serverConnector.getFile(targetFile, savePath);
     }
 
     public void cancel() {

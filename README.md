@@ -1,9 +1,11 @@
 # JJJTP
 FTPでファイルを取得する
+JavaFXで動作する
 
 ## 使い方
 接続先はsetting.xml に記載する。
 
+```
 <getlog>
 	ルート要素
 
@@ -36,3 +38,4 @@ FTPでファイルを取得する
             <password>	接続パスワード
             <embed>	任意。埋め込み文字列を設定する
             <group>	ファイルのグループを指定する。filetypes/group に一致するファイル群を表示する。
+```
