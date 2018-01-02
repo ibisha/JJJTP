@@ -61,8 +61,6 @@ public class Controller implements Initializable {
     @FXML
     TableView<FileBean> tableLog;
     @FXML
-    TableColumn<FileBean, String> columnLog;
-    @FXML
     TableColumn<FileBean, String> columnFileName;
     @FXML
     TableColumn<FileBean, String> columnTimeStamp;
@@ -91,7 +89,6 @@ public class Controller implements Initializable {
             fieldSaveTo.setText(ConfigParser.getSaveTo(SETTING_FILE));
 
             // ログテーブルのカラムの設定
-            columnLog.setCellValueFactory(new PropertyValueFactory<>("type"));
             columnFileName.setCellValueFactory(new PropertyValueFactory<>("fileName"));
             columnTimeStamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
             tableLog.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
