@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<getlog>
+    <fileTypes>
+        <group id="1">
+            <fileType>
+                <type>home</type>
+                <directory>/home/pi/</directory>
+            </fileType>
+        </group>
+    </fileTypes>
+    <envs>
+        <env name="sample">
+            <machine>
+                <name>RaspberryPi</name>
+                <ip>raspberrypi.local</ip>
+                <user>pi</user>
+                <password>passwd</password>
+                <group>1</group>
+            </machine>
+        </env>
+    </envs>
+    <saveFolder>
+        <path>/tmp/</path>
+    </saveFolder>
+</getlog>
