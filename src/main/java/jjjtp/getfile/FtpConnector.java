@@ -34,36 +34,36 @@ public class FtpConnector implements ServerConnector {
     }
 
     @Override
-    public boolean getFile(List<FileBean> targetLogs, String savePath) {
+    public boolean getFile(List<FileBean> targetFiles, String savePath) {
         boolean ret = false;
         Path saveDir = Paths.get(savePath);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         String now = sdf.format(System.currentTimeMillis());
 
-        for (FileBean targetLog : targetLogs) {
+        for (FileBean target: targetFiles) {
             // 出力ファイルを指定
-            File dest = saveDir.resolve(now + "-" + selected.getName() + "-" + targetLog.getFileName().replaceAll("\\\\","_")).toFile();
+            File dest = saveDir.resolve(now + "-" + selected.getName() + "-" + target.getFileName().replaceAll("\\\\","_")).toFile();
 
             try (FileOutputStream out = new FileOutputStream(dest)) {
-                logger.info("copy... " + targetLog.getAbsolutePath().toString() + " -> " + savePath);
+                logger.info("copy... " + target.getAbsolutePath().toString() + " -> " + savePath);
                 // 出力ファイルに書き出す
-                ret = ftpClient.retrieveFile(targetLog.getAbsolutePath().toString(), out);
+                ret = ftpClient.retrieveFile(target.getAbsolutePath().toString(), out);
             } catch (IOException e) {
                 logger.error(e);
             }
 
             // ftp転送元のタイムスタンプに修正
-            dest.setLastModified(targetLog.getTime());
+            dest.setLastModified(target.getTime());
         }
 
         return ret;
     }
 
     @Override
-    public List<FileBean> getFileName(FileBean logFileTmp) throws IOException {
+    public List<FileBean> getFileName(FileBean fileTemp) throws IOException {
         // ファイルフィルタ
         FTPFileFilter filter = new FTPFileFilter() {
-            Pattern pattern = Pattern.compile(logFileTmp.getKeyword());
+            Pattern pattern = Pattern.compile(fileTemp.getKeyword());
 
             @Override
             public boolean accept(FTPFile ftpFile) {
@@ -72,13 +72,13 @@ public class FtpConnector implements ServerConnector {
         };
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        String dir = logFileTmp.getDirectory();
+        String dir = fileTemp.getDirectory();
         FTPFile[] ftpFiles = ftpClient.listFiles(dir, filter);
-        List<FileBean> logFileList = new ArrayList<>();
+        List<FileBean> fileList = new ArrayList<>();
 
         for (FTPFile ftpFile : ftpFiles) {
             if (ftpFile.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION)) {
-                logFileList.add(new FileBean(logFileTmp.getType(), dir, dir + ftpFile.getName(),
+                fileList.add(new FileBean(fileTemp.getType(), dir, dir + ftpFile.getName(),
                         sdf.format(ftpFile.getTimestamp().getTime()), ftpFile.getTimestamp().getTimeInMillis()));
             } else {
                 // 権限が無いものはログに表示し、一覧に表示しない
@@ -86,7 +86,7 @@ public class FtpConnector implements ServerConnector {
             }
         }
 
-        return logFileList;
+        return fileList;
     }
 
     @Override

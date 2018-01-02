@@ -34,16 +34,15 @@ public class ConfigParser {
     private static final String MACHINE_USER = "user";
     private static final String MACHINE_PASSWORD = "password";
     private static final String MACHINE_GROUP = "group";
-    private static final String MACHINE_PROTOCOL = "protocol";
     private static final String MACHINE_EMBED = "embed";
 
     // ファイルの情報
-    private static final String LOG_TYPE = "type";
-    private static final String LOG_PATH = "directory";
-    private static final String LOG_KEYWORD = "keyword";
+    private static final String FILE_TYPE = "type";
+    private static final String FILE_PATH = "directory";
+    private static final String FILE_KEYWORD = "keyword";
     // フォルダ階層の深さを指定出来るようにしてあるが、直下より深いと探索に時間がかかることに注意
     // このため、デフォルト推奨(depth=1:直下)
-    private static final String LOG_DEPTH = "depth";
+    private static final String FILE_DEPTH = "depth";
 
     // XPath
     private static final XPathFactory xpathFactory = XPathFactory.newInstance();
@@ -75,7 +74,7 @@ public class ConfigParser {
         }
 
         MachineBean root = new MachineBean();
-        root.setName(envs.getAttribute(MACHINE_NAME));
+        root.setName("マシン選択");
         machineRoot.setValue(root);
 
         // env以下のmachine情報を取得
@@ -97,6 +96,7 @@ public class ConfigParser {
      * @return
      */
     private static TreeItem<MachineBean> setEnv(Node env) {
+
         // 環境名をセット
         String envName = ((Element) env).getAttribute(MACHINE_NAME);
         MachineBean envMachine = new MachineBean();
@@ -136,9 +136,6 @@ public class ConfigParser {
                     case (MACHINE_FTPPORT):
                         m.setFtpPort(Integer.parseInt(elem.getTextContent()));
                         break;
-                    case (MACHINE_PROTOCOL):
-                        m.setProto(MachineBean.Protocol.valueOf(elem.getTextContent()));
-                        break;
                     case (MACHINE_GROUP):
                         m.setGroup(elem.getTextContent());
                         break;
@@ -158,9 +155,9 @@ public class ConfigParser {
      * @param settingFile
      * @return ファイル種別一覧
      */
-    public static List<FileBean> createLogList(String settingFile)
+    public static List<FileBean> createFileList(String settingFile)
             throws SAXException, ParserConfigurationException, XPathExpressionException {
-        List<FileBean> logFileList = new ArrayList<>();
+        List<FileBean> fileList = new ArrayList<>();
 
         Document document = encryptedXMLReader(settingFile);
 
@@ -168,23 +165,23 @@ public class ConfigParser {
 
         // ファイル種別一覧を取得
         String location = "/getlog/fileTypes/group";
-        NodeList logGroups = (NodeList) xpath.evaluate(location, document, XPathConstants.NODESET);
+        NodeList fileGroups = (NodeList) xpath.evaluate(location, document, XPathConstants.NODESET);
 
-        if (logGroups == null) {
+        if (fileGroups == null) {
             throw new XPathExpressionException("ファイル種別一覧 " + location + "が設定されていません");
         }
 
-        for (int groupCount = 0; groupCount < logGroups.getLength(); groupCount++) {
+        for (int groupCount = 0; groupCount < fileGroups.getLength(); groupCount++) {
             // ロググループ単位で実行
-            Element logGroup = (Element) logGroups.item(groupCount);
-            String groupId = logGroup.getAttribute("id");
-            NodeList logNodeList = logGroup.getElementsByTagName("fileType");
+            Element fileGroup = (Element) fileGroups.item(groupCount);
+            String groupId = fileGroup.getAttribute("id");
+            NodeList fileNodeList = fileGroup.getElementsByTagName("fileType");
 
-            for (int fileTypeCount = 0; fileTypeCount < logNodeList.getLength(); fileTypeCount++) {
+            for (int fileTypeCount = 0; fileTypeCount < fileNodeList.getLength(); fileTypeCount++) {
                 // グループ内のファイル種類を一つずつ加えていく
-                Node logNode = logNodeList.item(fileTypeCount);
-                FileBean logFile = new FileBean();
-                logFile.setGroup(groupId);
+                Node logNode = fileNodeList.item(fileTypeCount);
+                FileBean fileBean = new FileBean();
+                fileBean.setGroup(groupId);
                 NodeList elements = logNode.getChildNodes();
                 for (int i = 0; i < elements.getLength(); i++) {
                     Node elem = elements.item(i);
@@ -192,30 +189,30 @@ public class ConfigParser {
                         continue;
                     }
                     switch (elem.getNodeName()) {
-                        case (LOG_TYPE):
-                            logFile.setType(elem.getTextContent());
+                        case (FILE_TYPE):
+                            fileBean.setType(elem.getTextContent());
                             break;
-                        case (LOG_PATH):
-                            if (logFile.getGroup().equals("Windows")) {
-                                logFile.setDirectory(elem.getTextContent().replaceAll("/", "\\\\"));
+                        case (FILE_PATH):
+                            if (fileBean.getGroup().equals("Windows")) {
+                                fileBean.setDirectory(elem.getTextContent().replaceAll("/", "\\\\"));
                             } else {
-                                logFile.setDirectory(elem.getTextContent());
+                                fileBean.setDirectory(elem.getTextContent());
                             }
                             break;
-                        case (LOG_KEYWORD):
-                            logFile.setKeyword(elem.getTextContent());
+                        case (FILE_KEYWORD):
+                            fileBean.setKeyword(elem.getTextContent());
                             break;
-                        case (LOG_DEPTH):
-                            logFile.setMaxDepth(Integer.parseInt(elem.getTextContent()));
+                        case (FILE_DEPTH):
+                            fileBean.setMaxDepth(Integer.parseInt(elem.getTextContent()));
                             break;
                         default:
                     }
                 }
-                logFileList.add(logFile);
+                fileList.add(fileBean);
             }
         }
 
-        return logFileList;
+        return fileList;
     }
 
     /**

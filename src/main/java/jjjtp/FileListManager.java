@@ -22,15 +22,15 @@ public class FileListManager {
     private final ServerConnector serverConnector;
     /** 選択されたサーバ */
     private final MachineBean selected;
-    /** ログ一覧 */
-    private List<FileBean> logFileList;
+    /** 一覧 */
+    private List<FileBean> fileList;
 
     public FileListManager(MachineBean selected, List<FileBean> logFileList) {
         this.selected = selected;
-        this.logFileList = new ArrayList<FileBean>();
+        this.fileList = new ArrayList<FileBean>();
         for (FileBean fileBean : logFileList) {
             try {
-                this.logFileList.add(fileBean.clone());
+                this.fileList.add(fileBean.clone());
             } catch (CloneNotSupportedException e) {
                 logger.error(e);
             }
@@ -40,24 +40,24 @@ public class FileListManager {
 
         // 設定ファイルで埋め込み文字がある場合は、Directoryをフォーマット
         if (selected.getEmbed() == null) {
-            this.logFileList.forEach(i -> i.setDirectory(i.getDirectory()));
+            this.fileList.forEach(i -> i.setDirectory(i.getDirectory()));
         } else {
-            this.logFileList.forEach(i -> i.setDirectory(MessageFormat.format(i.getDirectory(), selected.getEmbed())));
+            this.fileList.forEach(i -> i.setDirectory(MessageFormat.format(i.getDirectory(), selected.getEmbed())));
         }
     }
 
     /**
-     * ログ一覧テーブルの作成
+     * 一覧テーブルの作成
      *
      * @param items
      * @throws IOException
      */
     public void createLogTable(ObservableList<FileBean> items) {
-        List<FileBean> targetLogs = logFileList.stream().filter(i -> i.getGroup().equals(selected.getGroup()))
+        List<FileBean> targetLogs = fileList.stream().filter(i -> i.getGroup().equals(selected.getGroup()))
                 .collect(Collectors.toList());
         for (FileBean targetLog : targetLogs) {
             try {
-                // targetLogに一致するログ一覧をサーバから取得する
+                // targetLogに一致する一覧をサーバから取得する
                 List<FileBean> logs = serverConnector.getFileName(targetLog);
                 items.addAll(logs);
             } catch (IOException e) {

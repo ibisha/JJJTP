@@ -74,7 +74,7 @@
                             </HBox.margin>
                         </Button>
                         <Button fx:id="btnCancel" disable="true" mnemonicParsing="false" onAction="#doCancel" prefHeight="27.0" prefWidth="102.0" text="キャンセル" />
-                        <Button fx:id="btnDownloadLog" disable="true" mnemonicParsing="false" onAction="#doDownloadLog" prefHeight="27.0" prefWidth="121.0" text="ファイル取得" />
+                        <Button fx:id="btnDownload" disable="true" mnemonicParsing="false" onAction="#doDownload" prefHeight="27.0" prefWidth="121.0" text="ファイル取得" />
                         <Button fx:id="btnClose" mnemonicParsing="false" onAction="#doClose" prefHeight="27.0" prefWidth="91.0" text="終了" HBox.hgrow="NEVER" />
                     </children>
                     <padding>

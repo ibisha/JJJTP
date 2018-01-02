@@ -55,7 +55,7 @@ public class Controller implements Initializable {
     Button btnCancel;
     /** ダウンロードボタン */
     @FXML
-    Button btnDownloadLog;
+    Button btnDownload;
 
     /** ファイル一覧テーブル */
     @FXML
@@ -83,12 +83,11 @@ public class Controller implements Initializable {
             machineRoot.setExpanded(true);
             machineList.setRoot(machineRoot);
 
-            // ログ一覧を取得
-            logFileList = ConfigParser.createLogList(SETTING_FILE);
-            // 保存先をセット
+            // 一覧を取得
+            logFileList = ConfigParser.createFileList(SETTING_FILE);
+
             fieldSaveTo.setText(ConfigParser.getSaveTo(SETTING_FILE));
 
-            // ログテーブルのカラムの設定
             columnFileName.setCellValueFactory(new PropertyValueFactory<>("fileName"));
             columnTimeStamp.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
             tableLog.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -99,13 +98,13 @@ public class Controller implements Initializable {
                 fieldMachineName.setText(selectedMachine.getName());
             });
         } catch (Exception e) {
-            logger.error("ログビューア初期化失敗", e);
+            logger.error("JJJTP初期化失敗", e);
             Platform.exit();
         }
     }
 
     /**
-     * サーバのログファイル一覧を取得する
+     * サーバのファイル一覧を取得する
      *
      * @param event
      */
@@ -115,7 +114,7 @@ public class Controller implements Initializable {
             return;
         }
 
-        // 取得したいログの種類を選択するダイアログ
+        // 取得したいファイルの種類を選択するダイアログ
         ChoiceDialog<FileBean> dialog = new ChoiceDialog<>();
         ListView<FileBean> logList = new ListView<>();
         logList.setItems(FXCollections.observableArrayList());
@@ -124,7 +123,7 @@ public class Controller implements Initializable {
         MultipleSelectionModel msm = logList.getSelectionModel();
         msm.setSelectionMode(SelectionMode.MULTIPLE);
         dialog.getDialogPane().setContent(logList);
-        dialog.getDialogPane().setHeaderText("ログ選択");
+        dialog.getDialogPane().setHeaderText("ファイル選択");
 
         // OKボタン押下時のみ、選択項目を渡す
         final ObservableList<FileBean>[] selected = new ObservableList[1];
@@ -133,19 +132,19 @@ public class Controller implements Initializable {
         });
         dialog.showAndWait();
 
-        ObservableList<FileBean> selectedLogs = selected[0];
-        if (selectedLogs == null || selectedLogs.size() == 0) {
+        ObservableList<FileBean> selectedFiles = selected[0];
+        if (selectedFiles == null || selectedFiles.size() == 0) {
             return;
         }
 
         // コントロールの活性化・非活性化
         machineList.setDisable(true);
         btnCancel.setDisable(false);
-        btnDownloadLog.setDisable(false);
-        // ログテーブルの生成
+        btnDownload.setDisable(false);
+        // テーブルの生成
         ObservableList<FileBean> tableItems = FXCollections.observableArrayList();
         tableLog.setItems(tableItems);
-        fileListManager = new FileListManager(selectedMachine, selectedLogs);
+        fileListManager = new FileListManager(selectedMachine, selectedFiles);
 
         fileListManager.open();
         try {
@@ -159,7 +158,7 @@ public class Controller implements Initializable {
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle("ERROR");
-            alert.setHeaderText("ログ一覧の取得に失敗しました。");
+            alert.setHeaderText("一覧の取得に失敗しました。");
             alert.setContentText("※エラーログ参照");
             alert.show();
 
@@ -175,12 +174,12 @@ public class Controller implements Initializable {
      * @param event
      */
     @FXML
-    public void doDownloadLog(ActionEvent event) {
-        ObservableList<FileBean> selectedLogs = tableLog.getSelectionModel().getSelectedItems();
-        for (FileBean selectedLog : selectedLogs) {
-            logger.debug(selectedLog.paramString());
+    public void doDownload(ActionEvent event) {
+        ObservableList<FileBean> selectedItems = tableLog.getSelectionModel().getSelectedItems();
+        for (FileBean selectedItem : selectedItems) {
+            logger.debug(selectedItem.paramString());
         }
-        if (!fileListManager.downloadLog(selectedLogs, fieldSaveTo.getText())) {
+        if (!fileListManager.downloadLog(selectedItems, fieldSaveTo.getText())) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("ERROR");
             alert.setHeaderText("ダウンロードに失敗しました。");
@@ -197,7 +196,7 @@ public class Controller implements Initializable {
     @FXML
     public void doCancel(ActionEvent event) {
         // コントロールの活性化・非活性化
-        btnDownloadLog.setDisable(true);
+        btnDownload.setDisable(true);
         btnCancel.setDisable(true);
         machineList.setDisable(false);
         tableLog.setItems(null);
